@@ -9,6 +9,7 @@
 import UIKit
 
 class ChatViewController: UIViewController {
+    
     @IBOutlet weak var tableViewMain: UITableView!
     @IBOutlet weak var txtContent: UITextField!
     @IBOutlet weak var btnSend: UIButton!
@@ -114,18 +115,20 @@ class ChatViewController: UIViewController {
     {
         let arrListTemp = NSMutableArray.init()
         let arrListResult = NSMutableArray.init()
+        let maxCharacter = 50
+        let constant = 2 //Character space white and "/" in line
         var count = 1
-
-        if strInput.characters.count < 51 {
+        
+        if strInput.characters.count < maxCharacter + 1 {
             arrListTemp.add(strInput)
         }
         else {
-            let estimal = strInput.characters.count / 50
+            //Estimal row
+            let estimal = strInput.characters.count / maxCharacter
             var temp = strInput
 
-            while temp.characters.count >= (50 - 2 - String(estimal).characters.count - String(count).characters.count) {
-                
-                var position = 49 - String(count).characters.count - 2 - String(estimal).characters.count
+            while temp.characters.count >= (maxCharacter - constant - String(estimal).characters.count - String(count).characters.count) {
+                var position = (maxCharacter - 1) - constant - String(count).characters.count - String(estimal).characters.count
                 for index in stride(from: position, through: 0, by: -1) {
                     if (temp[index] == " ") {
                         position = index
@@ -134,9 +137,9 @@ class ChatViewController: UIViewController {
                 }
 
                 let item:String = temp[0 ..< position + 1]
-                let index = temp.index(temp.startIndex, offsetBy: position)
                 arrListTemp.add(item)
-
+                
+                let index = temp.index(temp.startIndex, offsetBy: position)
                 temp = temp.substring(from: index)
                 if(temp[0] == " ") {
                     let index = temp.index(temp.startIndex, offsetBy: 1)
@@ -146,8 +149,6 @@ class ChatViewController: UIViewController {
                 count = count + 1
             }
             arrListTemp.add(temp)
-
-
         }
         
         for index in 0 ..< arrListTemp.count {
@@ -187,7 +188,17 @@ extension ChatViewController: UITextFieldDelegate
     func textFieldShouldReturn(_ textField: UITextField) -> Bool
     {
         if textField === txtContent {
-            print(txtContent.text as Any)
+            if txtContent.text != "" {
+                let inputString = self.txtContent.text?.trimmingCharacters(in: .whitespaces)
+                arrData = splitMessage(inputString!)
+                tableViewMain.reloadData()
+                self.txtContent.text = ""
+            }
+            else {
+                let alert = UIAlertController(title: "Note", message: "Please enter a value before submitting!", preferredStyle: UIAlertControllerStyle.alert)
+                alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+            }
         }
         
         return true
